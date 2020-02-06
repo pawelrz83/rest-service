@@ -4,7 +4,12 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,6 +39,43 @@ public class AuthenticateController {
 	    return json_result;
 		
 	}
+	
+	/*
+	 * @GetMapping("/authenticate3")
+	 * 
+	 * @ResponseBody public Map<String, Object> authenticate3(@RequestParam(value =
+	 * "pin") String name) { Map<String, Object> json_result = new
+	 * LinkedHashMap<>(); Authenticate authenticator = new
+	 * Authenticate(counter.incrementAndGet(), name); json_result.put("token",
+	 * authenticator.getToken());
+	 * 
+	 * return json_result;
+	 * 
+	 * }
+	 */
+	
+	@RequestMapping(value = "/authenticate3", method = RequestMethod.POST)
+	 // public ResponseEntity<String> authenticate3(@RequestBody Authenticate authenticator) 
+	  public ResponseEntity<String> authenticate3(@RequestBody Map<String, Object> json_result) 
+	{
+		System.out.println(json_result);
+		
+		
+		Authenticate authenticator = new Authenticate(
+				Long.parseLong( json_result.get("id").toString() ), 
+				json_result.get("pin").toString() 
+				);
+		
+		System.out.println("token is: " + authenticator.getToken() );
+		if( authenticator.getToken().equals("error") )
+		{
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}else {
+			return ResponseEntity.status(HttpStatus.CREATED).build();
+		}
+	}
+	
+	
 	
 	//Write another requestBody /authenticate3 where you check if pin is ok and you return json with id, token but 
 	//if pin is not valid, return json {'status':'401', 'msg':'Unauthorized'}  not less and no more than this information
