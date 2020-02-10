@@ -1,26 +1,31 @@
 package com.example.restservice;
 
-import java.security.SecureRandom;
-import java.util.Base64;
-
 public class Authenticate {
 
 	private final long id;
 	private final String validPin = "1234";
 	private final String pin;
-	private String token="error";
+	private final String user_id;
+	private Token token;
 	
-	public Authenticate(long id, String pin) {
+	public Authenticate(long id, String user_id, String pin) {
 		this.id = id;
 		this.pin = pin;
+		this.user_id = user_id;
 		System.out.println("Constructor initialising");
 		System.out.println("validPin is: " + this.validPin);
 		System.out.println("pin is: " + this.pin);
+		System.out.println("user_id is: " + this.user_id);
 		//condition to check authentication by pin
 		if(this.pin.equals(this.validPin))
 		{
+			this.token = new Token(user_id);
+			// Initialisation for Token object, constructor creates there token.
 			System.out.println("Token generation");
-			this.token = generateToken();
+		}
+		else
+		{
+			this.token = null;
 		}
 	}
 
@@ -28,25 +33,8 @@ public class Authenticate {
 		return id;
 	}
 	
-	public String getToken() {
+	
+	public Token getToken(){
 		return token;
 	}
-	public String generateToken()
-	{
-		Base64.Encoder base64Encoder = Base64.getUrlEncoder(); 
-		SecureRandom random = new SecureRandom();
-		byte bytes[] = new byte[80];
-	    random.nextBytes(bytes);
-		String token = base64Encoder.encodeToString(bytes);
-		return token;
-	}
-	/*
-	 * Removing this function eliminates 'content' from JSON, so this serialization proces must 
-	 * encapsulate all get* function from java class and creates a JSON based on them
-	public String getContent() {
-		System.out.println("Getting content method");
-		//return token;
-		//instead of token we return JSON with {token: value} 
-		return String.format("{'token': '%s'}",token);
-	}*/
 }
