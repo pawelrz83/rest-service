@@ -64,20 +64,28 @@ public class AuthenticateController {
 	 * 
 	 * }
 	 */
+	//------------------------------- Excerise 1 ------------------------------------------------
+	//  client --->    {POST}  ---->  /authenticate    
+	//  client <---    {RESPONSE} {token:"asdsadsadsa"}   <----  Server
+	//      Client knows the token it can communicate and ask for everything...
 	
-	@RequestMapping(value = "/authenticate3", method = RequestMethod.POST)
-	 // public ResponseEntity<String> authenticate3(@RequestBody Authenticate authenticator) 
-	  public ResponseEntity<String> authenticate3(@RequestBody Map<String, Object> json_result) 
+	//  client --->    {POST}{token:"asdsadsadsa"} ----> /getPicture  (validation if token belongs to user and is valid)
+	//  client <---    {RESPONSE}{data:"01010101010110"}  <----  Server 
+	//---------------------------------------------------------------------------------------------
+	
+	
+	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
+	 // public ResponseEntity<String> authenticate(@RequestBody Authenticate authenticator) 
+	  public ResponseEntity<String> authenticate(@RequestBody Map<String, Object> json_result) 
 	{
 		System.out.println(json_result);
 		
 		
 		Authenticate authenticator = new Authenticate(
-				Long.parseLong( json_result.get("id").toString() ),
 				json_result.get("user_id").toString(),
 				json_result.get("pin").toString() 
 				);
-				
+		System.out.println("I am after authenticator initialisation");		
 		
 		if( authenticator.getToken() != null )
 		{
@@ -91,14 +99,39 @@ public class AuthenticateController {
 			repository.save( authenticator.getToken() );
 			System.out.println(authenticator.getToken().getId());
 			
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+			return ResponseEntity.status(HttpStatus.CREATED).build(); // TODO 1. How to add token into body of response! 
+			
 		}else 
 		{
-			return ResponseEntity.status(HttpStatus.CREATED).build();
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 	}
 	// curl --request POST http://localhost:8080/authenticate3 --header "Content-Type: application/json" -d "{\"id\":1, \"user_id\":\"rzeczkop\", \"pin\":\"12342\"}" -v
 	
-	 
-	
+	@RequestMapping(value = "/getPicture", method = RequestMethod.POST)  // TODO 2. Write getPicture function
+	 // public ResponseEntity<String> authenticate(@RequestBody Authenticate authenticator) 
+	public ResponseEntity<String> getPicture(@RequestBody Map<String, Object> json_result) 
+	{
+		
+		// Simplification for beginnig, PICTURE String picture="/var/www/picture.jpg"
+		// (token belongs to user_id ) && (token is valid)
+		// 
+		// 
+		//  INPUT token:"asdsadsadsa"  -> Lista =  findByUserid("rzeczkop");
+		
+		//  for each token check:
+		//     if token == lista.token
+		//		  if it is still valid:
+		//			we have it, we can return PICTURE, so string in body
+		//     	  else  
+		//		    return error token invalid    
+		//     else
+		//		  if it is invalid:
+		//         invalidate token into database -> isValid - false
+		// }
+		
+		System.out.println(json_result);
+		
+		return ResponseEntity.status(HttpStatus.CREATED).build();
+	}
 }

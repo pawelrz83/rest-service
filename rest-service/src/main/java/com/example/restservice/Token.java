@@ -22,8 +22,9 @@
 		private String id;
 		private String token;
 		private String userid;
-		private boolean isValid=true;
-		private LocalDateTime created_date = LocalDateTime.now();
+		private boolean isValid=true;  // default value - true. How to change it to false, when it will expire?
+		private LocalDateTime created_date = LocalDateTime.now(); // TODO change for local PL time or time of the server.
+		// not GMT becacuse there will be some glitches with comparing the time : 
 
 		public Token() {}
 		public Token(String userid) {

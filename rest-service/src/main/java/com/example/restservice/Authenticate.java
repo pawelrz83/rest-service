@@ -2,14 +2,13 @@ package com.example.restservice;
 
 public class Authenticate {
 
-	private final long id;
+	//private final long id;
 	private final String validPin = "1234";
 	private final String pin;
 	private final String user_id;
 	private Token token;
 	
-	public Authenticate(long id, String user_id, String pin) {
-		this.id = id;
+	public Authenticate(String user_id, String pin) {
 		this.pin = pin;
 		this.user_id = user_id;
 		System.out.println("Constructor initialising");
@@ -29,10 +28,6 @@ public class Authenticate {
 		}
 	}
 
-	public long getId() {
-		return id;
-	}
-	
 	
 	public Token getToken(){
 		return token;
