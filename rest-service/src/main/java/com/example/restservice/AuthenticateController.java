@@ -1,6 +1,7 @@
 package com.example.restservice;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -106,13 +107,38 @@ public class AuthenticateController {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
 	}
-	// curl --request POST http://localhost:8080/authenticate3 --header "Content-Type: application/json" -d "{\"id\":1, \"user_id\":\"rzeczkop\", \"pin\":\"12342\"}" -v
+	
+	
+	
+	// curl --request POST http://localhost:8080/authenticate --header "Content-Type: application/json" -d "{\"id\":1, \"user_id\":\"rzeczkop\", \"pin\":\"1234\"}" -v
 	
 	@RequestMapping(value = "/getPicture", method = RequestMethod.POST)  // TODO 2. Write getPicture function
 	 // public ResponseEntity<String> authenticate(@RequestBody Authenticate authenticator) 
 	public ResponseEntity<String> getPicture(@RequestBody Map<String, Object> json_result) 
 	{
+		System.out.println(json_result);
+		Object	user = json_result.get("user_id");
+		Object token = json_result.get("token");
+		System.out.println(user);
+		System.out.println(token);
+		System.out.println(user.toString());
+		System.out.println(token.toString());
 		
+		List<Token> tokenList =  repository.findByUserid(json_result.get("user_id").toString());
+//		
+			
+//			System.out.println(tokenList);
+//			
+//			extracted(tokenList);
+			
+//			String picture="/var/www/picture.jpg";
+			
+			// curl --request POST http://localhost:8080/getPicture --header "Content-Type: application/json" -d "{\"id\":1, \"user_id\":\"rzeczkop\", \"pin\":\"1234\"}" -v
+			
+//			  Object valid;
+//			for(token valid){
+//				  System.out.println(picture);
+//			  }
 		// Simplification for beginnig, PICTURE String picture="/var/www/picture.jpg"
 		// (token belongs to user_id ) && (token is valid)
 		// 
