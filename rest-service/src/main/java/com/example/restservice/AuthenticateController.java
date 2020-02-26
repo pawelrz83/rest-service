@@ -1,5 +1,10 @@
 package com.example.restservice;
 
+import java.net.Authenticator;
+import java.text.BreakIterator;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -77,16 +82,18 @@ public class AuthenticateController {
 	
 	@RequestMapping(value = "/authenticate", method = RequestMethod.POST)
 	 // public ResponseEntity<String> authenticate(@RequestBody Authenticate authenticator) 
-	  public ResponseEntity<String> authenticate(@RequestBody Map<String, Object> json_result) 
-	{
+	
+	  public ResponseEntity<Object> authenticate(@RequestBody Map<String, Object> json_result) {
 		System.out.println(json_result);
-		
+		 boolean authenticated = false;
+		 String token = json_result.get("token").toString();
 		
 		Authenticate authenticator = new Authenticate(
 				json_result.get("user_id").toString(),
 				json_result.get("pin").toString() 
 				);
-		System.out.println("I am after authenticator initialisation");		
+		System.out.println("I am after authenticator initialisation");	
+		
 		
 		if( authenticator.getToken() != null )
 		{
@@ -95,17 +102,24 @@ public class AuthenticateController {
 			//Session session = HibernateMongoSessionUtils.getInstance().openSession();
 			//Transaction tx = session.beginTransaction();
 			//session.save(authenticator.getToken());
+			authenticated = true;
 			
 			
 			repository.save( authenticator.getToken() );
 			System.out.println(authenticator.getToken().getId());
 			
-			return ResponseEntity.status(HttpStatus.CREATED).build(); // TODO 1. How to add token into body of response! 
+			if(authenticated) {
+				HashMap<String, Object> entity = new HashMap<>();
+			    entity.put(token, json_result);
+
+			    return new ResponseEntity<Object>(entity, HttpStatus.OK); // TODO 1. How to add token into body of response! 
 			
-		}else 
-		{
+		}
+			else {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
+		}
+		return null;
 	}
 	
 	
@@ -114,18 +128,54 @@ public class AuthenticateController {
 	
 	@RequestMapping(value = "/getPicture", method = RequestMethod.POST)  // TODO 2. Write getPicture function
 	 // public ResponseEntity<String> authenticate(@RequestBody Authenticate authenticator) 
-	public ResponseEntity<String> getPicture(@RequestBody Map<String, Object> json_result) 
+	public ResponseEntity<Object> getPicture(@RequestBody Map<String, Object> json_result) 
 	{
 		System.out.println(json_result);
-		Object	user = json_result.get("user_id");
-		Object token = json_result.get("token");
+		String	user = json_result.get("user_id").toString();
+		String token = json_result.get("token").toString();
 		System.out.println(user);
 		System.out.println(token);
 		System.out.println(user.toString());
 		System.out.println(token.toString());
+		long validityEpoch = 60*60*24;
 		
 		List<Token> tokenList =  repository.findByUserid(json_result.get("user_id").toString());
 //		
+	    boolean authenticated = false;
+		long currentEpoch = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);	
+		for(Token tokenElem:tokenList) {
+		//tokenList.forEach((tokenElem) -> {
+            System.out.println(tokenElem);
+            long tokenCreateEpoch = tokenElem.getCreated_date().toEpochSecond(ZoneOffset.UTC);            
+            if(token.contentEquals(tokenElem.getTokenString())) {
+            	
+            	//System.out.println("Token usera" + user + "jest znaleziony w bazie");
+            	System.out.printf("Token usera %s jest znaleziony w bazie", token);
+            	if(currentEpoch - tokenCreateEpoch <= validityEpoch) {
+                 	System.out.println("Token jest ważny" + tokenElem.getTokenString());
+                 	authenticated = true;
+                 }
+            	else {
+            		System.out.println("Token jest nieważny");
+            	}
+            }
+           
+            
+           
+        }
+		
+		if(authenticated) {
+			String picture="/var/www/picture.jpg";
+			HashMap<String, Object> entity = new HashMap<>();
+		    entity.put("picture", picture);
+
+		    return new ResponseEntity<Object>(entity, HttpStatus.OK);
+//            return ResponseEntity.status(HttpStatus.CREATED).build(); // TODO 1. How to add Picture into body of response! 
+			
+		}else 
+		{
+			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+		}
 			
 //			System.out.println(tokenList);
 //			
@@ -133,7 +183,7 @@ public class AuthenticateController {
 			
 //			String picture="/var/www/picture.jpg";
 			
-			// curl --request POST http://localhost:8080/getPicture --header "Content-Type: application/json" -d "{\"id\":1, \"user_id\":\"rzeczkop\", \"pin\":\"1234\"}" -v
+		//curl --request POST http://localhost:8080/getPicture --header "Content-Type: application/json" -d "{\"user_id\":\"rzeczkop\", \"token\":\"fD4r_E1hvkkchgHeCBjHJCZ299CUOjXUm6F-6u68pCWDhNRbQsoBRev811Z_L51KoW80IB4jJmCh-KKDV6S9eVGEbY16UfzGi_6CR9ey530=\"}" -v
 			
 //			  Object valid;
 //			for(token valid){
@@ -156,8 +206,8 @@ public class AuthenticateController {
 		//         invalidate token into database -> isValid - false
 		// }
 		
-		System.out.println(json_result);
-		
-		return ResponseEntity.status(HttpStatus.CREATED).build();
+//		System.out.println(json_result);
+//		
+//		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 }
