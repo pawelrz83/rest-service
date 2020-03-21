@@ -81,24 +81,7 @@
 			return builder.toString();
 		}
 		
-		private String series = "167c051c4f52d2f613155e21f04bd513d816a2389dce3842a8ea5c6a7b943f19";
-		
-		public String getSeries() {
-			return series;
-		}
-		public void setSeries(String series) {
-			this.series = series;
-		}
-		
 
-		private String salt = "234resdfsdfzsdf";
-		
-		public String getSalt() {
-			return salt;
-		}
-		public void setSalt(String salt) {
-			this.salt = salt;
-		}
 		
 	}
 

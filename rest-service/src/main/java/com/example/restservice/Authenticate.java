@@ -8,6 +8,8 @@ public class Authenticate {
 	private final String user_id;
 	private Token token;
 	
+	private String series = "167c051c4f52d2f613155e21f04bd513d816a2389dce3842a8ea5c6a7b943f19";
+	
 	public Authenticate(String user_id, String pin) {
 		this.pin = pin;
 		this.user_id = user_id;
@@ -18,6 +20,7 @@ public class Authenticate {
 		//condition to check authentication by pin
 		if(this.pin.equals(this.validPin))
 		{
+			System.out.println("Iniside TOken constructor");
 			this.token = new Token(user_id);
 			// Initialisation for Token object, constructor creates there token.
 			System.out.println("Token generation");
@@ -28,8 +31,23 @@ public class Authenticate {
 		}
 	}
 
-	
 	public Token getToken(){
 		return token;
+	}
+	
+	public String getSeries() {
+		return series;
+	}
+	public void setSeries(String series) {
+		this.series = series;
+	}
+	
+	private String salt = "234resdfsdfzsdf";
+	
+	public String getSalt() {
+		return salt;
+	}
+	public void setSalt(String salt) {
+		this.salt = salt;
 	}
 }
