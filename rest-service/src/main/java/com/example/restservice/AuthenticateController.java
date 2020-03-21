@@ -1,6 +1,8 @@
 package com.example.restservice;
 
 import java.net.Authenticator;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.BreakIterator;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -9,7 +11,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-
+import java.security.SecureRandom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -86,7 +88,6 @@ public class AuthenticateController {
 	  public ResponseEntity<Object> authenticate(@RequestBody Map<String, Object> json_result) {
 		System.out.println(json_result);
 		 boolean authenticated = false;
-		 String token = json_result.get("token").toString();
 		
 		Authenticate authenticator = new Authenticate(
 				json_result.get("user_id").toString(),
@@ -108,18 +109,12 @@ public class AuthenticateController {
 			repository.save( authenticator.getToken() );
 			System.out.println(authenticator.getToken().getId());
 			
-			if(authenticated) {
-				HashMap<String, Object> entity = new HashMap<>();
-			    entity.put(token, json_result);
-
-			    return new ResponseEntity<Object>(entity, HttpStatus.OK); // TODO 1. How to add token into body of response! 
+			return ResponseEntity.status(HttpStatus.CREATED).build(); // TODO 1. How to add token into body of response! 
 			
-		}
-			else {
+		}else 
+		{
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 		}
-		}
-		return null;
 	}
 	
 	
@@ -210,4 +205,16 @@ public class AuthenticateController {
 //		
 //		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
-}
+	
+	@RequestMapping(value = "/secureAuthenticate", method = RequestMethod.POST)
+	public ResponseEntity<Object> secureAuthenticate(@RequestBody Map<String, Object> json_result) 
+	
+	    {	         
+	    	MessageDigest md = MessageDigest.getInstance("SHA-256");
+	    	md.update(getSalt);
+	    	
+	    }
+		
+	}
+
+
