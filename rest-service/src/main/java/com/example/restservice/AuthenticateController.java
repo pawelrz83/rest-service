@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.security.SecureRandom;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatus.Series;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -209,8 +210,7 @@ public class AuthenticateController {
 	@RequestMapping(value = "/secureAuthenticate", method = RequestMethod.POST)
 	public ResponseEntity<Object> secureAuthenticate(@RequestBody Map<String, Object> json_result) 
 	{	         
-	   
-	    	
+	   	
 	    	System.out.println(json_result);
 			boolean authenticated = false;
 			
@@ -219,6 +219,8 @@ public class AuthenticateController {
 					json_result.get("pin").toString() 
 					);
 			System.out.println("I am after authenticator initialisation");
+			
+			
 			MessageDigest md = null;
 			try {
 		 	md = MessageDigest.getInstance("SHA-256");
@@ -230,33 +232,48 @@ public class AuthenticateController {
 	    	md.update( userpinAndSalt.getBytes()); 
 	    	
 	    	byte[] bytes = md.digest();   // chyba to jest zakodowanie hasha sha256 do zmiennej bytes. 
-	    	System.out.println(bytes);   // wartość tego powinna być docelową wartością hasła zapamiętanego w bazie albo w definicji klasy.
-			
-			if( authenticator.getToken() != null )   // skopiowałem to ze zwykłej funkcji /authenticate ale to wymagałoby poprawy, getToken zwraca już token który jest ustawiany w konstruktorze
-													 // ale te ustawienie dotyczy sterego sposobu gdzie if(this.pin.equals(this.validPin))... my teraz chcemy porównywać sha256(pin+salt) 
-													 // musisz dopisać drugi konstruktor klasy authenticate ... który zrobi porównanie na sha256(pin+salt) 
-													 // reszte poniżej też trzeba zweryfikować, ale chyba jest już ok.
+	    	System.out.println(bytes);  // wartość tego powinna być docelową wartością hasła zapamiętanego w bazie albo w definicji klasy.
+	    	
+	    	System.out.println(authenticator.getSalt());
+	    	
+	    	System.out.println(authenticator.getSeries());
+	    	
+
+	
+
+	    	if(userpinAndSalt.equals(authenticator.getSeries()))
+	    		
 			{
-				System.out.println("token is: " + authenticator.getToken().getTokenString() );  // can be changed to serialisation str(token) = "aaaccc"
+				System.out.println("SHA-256 authenticate");
+
+			
+			}
+			
+	    	else 
+			{
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+			}
+			
+	}
+}
+
+//curl --request POST http://localhost:8080/secureAuthenticate --header "Content-Type: application/json" -d "{\"id\":1, \"user_id\":\"rzeczkop\", \"pin\":\"1234\"}" -v
+
+
+				 // skopiowałem to ze zwykłej funkcji /authenticate ale to wymagałoby poprawy, getToken zwraca już token który jest ustawiany w konstruktorze
+				 // ale te ustawienie dotyczy sterego sposobu gdzie if(this.pin.equals(this.validPin))... my teraz chcemy porównywać sha256(pin+salt) 
+				 // musisz dopisać drugi konstruktor klasy authenticate ... który zrobi porównanie na sha256(pin+salt) 
+				 // reszte poniżej też trzeba zweryfikować, ale chyba jest już ok.				
+				
+	
+//				System.out.println("token is: " + authenticator.getToken().getTokenString() );  // can be changed to serialisation str(token) = "aaaccc"
 				// let's open the connection to database trying to save the token to MongoDB
 				//Session session = HibernateMongoSessionUtils.getInstance().openSession();
 				//Transaction tx = session.beginTransaction();
 				//session.save(authenticator.getToken());
-				authenticated = true;
-				
-				
-				repository.save( authenticator.getToken() );
-				System.out.println(authenticator.getToken().getId());
-				
-				return ResponseEntity.status(HttpStatus.CREATED).build(); // TODO 1. How to add token into body of response! 
-				
-			}else 
-			{
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-			}
-	    	
-	}
 	
-}
+	
+	
+
 
 
