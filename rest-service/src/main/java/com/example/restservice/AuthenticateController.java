@@ -219,43 +219,45 @@ public class AuthenticateController {
 					json_result.get("pin").toString() 
 					);
 			System.out.println("I am after authenticator initialisation");
-			
-			
-			MessageDigest md = null;
-			try {
-		 	md = MessageDigest.getInstance("SHA-256");
-			}catch (NoSuchAlgorithmException e) {
-			    throw new IllegalStateException("System doesn't support SHA-256 algorithm.");
-			}
-			String userpinAndSalt = json_result.get("user_id").toString() + authenticator.getSalt();
-			
-	    	md.update( userpinAndSalt.getBytes()); 
-	    	
-	    	byte[] bytes = md.digest();   // chyba to jest zakodowanie hasha sha256 do zmiennej bytes. 
-	    	System.out.println(bytes);  // wartość tego powinna być docelową wartością hasła zapamiętanego w bazie albo w definicji klasy.
-	    	
-	    	System.out.println(authenticator.getSalt());
-	    	
-	    	System.out.println(authenticator.getSeries());
-	    	
-
+		
 	
-
-	    	if(userpinAndSalt.equals(authenticator.getSeries()))
-	    		
+// te porównanie poniżej powinno być w konstruktorze klasy authenticate() kontroler nie ma za zadanie analizowania logiki
+// on ma tutaj tylko strzelac z akcji, wykonywać funkcje wyświetlajace, wykonujące. Nie możesz tutaj przeprowadzać operacji
+// na otwartym sercu, robie commenta poniżej i robie po swojemu, zobacz jak!
+/*	    	
+	    	if(userpinAndSalt.equals(authenticator.getSeries()))	
 			{
 				System.out.println("SHA-256 authenticate");
-
+				return ResponseEntity.status(HttpStatus.OK).build();
 			
-			}
-			
+			}			
 	    	else 
 			{
 				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 			}
-			
+*/			
+			if( authenticator.getToken() != null )
+			{
+				System.out.println("token is: " + authenticator.getToken().getTokenString() );  // can be changed to serialisation str(token) = "aaaccc"
+				// let's open the connection to database trying to save the token to MongoDB
+				//Session session = HibernateMongoSessionUtils.getInstance().openSession();
+				//Transaction tx = session.beginTransaction();
+				//session.save(authenticator.getToken());
+				authenticated = true;
+				
+				
+				repository.save( authenticator.getToken() );
+				System.out.println(authenticator.getToken().getId());
+				
+				return ResponseEntity.status(HttpStatus.CREATED).build(); // TODO 1. How to add token into body of response! 
+				
+			}else 
+			{
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+			}
 	}
-}
+	
+
 
 //curl --request POST http://localhost:8080/secureAuthenticate --header "Content-Type: application/json" -d "{\"id\":1, \"user_id\":\"rzeczkop\", \"pin\":\"1234\"}" -v
 
@@ -272,7 +274,22 @@ public class AuthenticateController {
 				//Transaction tx = session.beginTransaction();
 				//session.save(authenticator.getToken());
 	
-	
+
+	@RequestMapping(value = "/changePassword", method = RequestMethod.POST)
+	public ResponseEntity<Object> changePassword(@RequestBody Map<String, Object> json_result) 
+	{	         
+	   	//Napisz tutaj funkcję ustawienia hasła, czyli przyjmujesz w ciele token, sprawdzasz czy jest ważny, jak tak to masz zmienić userowi hasło
+		// funkcja przyjmie {'user_id':rzeczkop, 'token':'jakis valid token z bazy', 'newPin':'4321'}
+		// od razu może być za trudne zrobić wszystko ponieważ, trzeba stworzyć nowy obiekt, klasę: User z polem passwordHash i salt
+		// 1) każdy user pierwszy raz logujący się do systemu korzysta z pinu 1234 ale po wygenerowaniu tokenu może zmienić hasło na cokolwiek
+		// 2) wszystko jest zapisywany do mongodb bazy - możesz podejrzeć jak Token zapisujemy
+		// 3) zapis passwordHash ma być zrobiony jak w secureAuthenticate, czyli zapisujesz base64 zmiennej bytes z salt+haslo podane w funkcji
+		// 4) salt ma byc generowany dla kazdego usera - może być przez funkcję /changePassword albo w secure authenticate.
+		// Jak nie wiadomo jak ugryzc temat to zrob System.out.println("zapisuje usera do bazy") czy coś w tym stylu i pisz dalej, wrócimy do problemów
+		
+		return ResponseEntity.status(HttpStatus.CREATED).build();
+	}
+}
 	
 
 
