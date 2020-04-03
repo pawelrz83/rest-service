@@ -31,7 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthenticateController {
 	@Autowired
-	public TokenRepository repository;
+	public TokenRepository tokenRepository;   
+	public UserRepository userRepository;
 	/*
 	 * private final AtomicLong counter = new AtomicLong();
 	 * 
@@ -107,7 +108,7 @@ public class AuthenticateController {
 			authenticated = true;
 			
 			
-			repository.save( authenticator.getToken() );
+			tokenRepository.save( authenticator.getToken() );
 			System.out.println(authenticator.getToken().getId());
 			
 			return ResponseEntity.status(HttpStatus.CREATED).build(); // TODO 1. How to add token into body of response! 
@@ -135,7 +136,7 @@ public class AuthenticateController {
 		System.out.println(token.toString());
 		long validityEpoch = 60*60*24;
 		
-		List<Token> tokenList =  repository.findByUserid(json_result.get("user_id").toString());
+		List<Token> tokenList =  tokenRepository.findByUserid(json_result.get("user_id").toString());
 //		
 	    boolean authenticated = false;
 		long currentEpoch = LocalDateTime.now().toEpochSecond(ZoneOffset.UTC);	
@@ -246,7 +247,7 @@ public class AuthenticateController {
 				authenticated = true;
 				
 				
-				repository.save( authenticator.getToken() );
+				tokenRepository.save( authenticator.getToken() );
 				System.out.println(authenticator.getToken().getId());
 				
 				return ResponseEntity.status(HttpStatus.CREATED).build(); // TODO 1. How to add token into body of response! 
@@ -288,6 +289,35 @@ public class AuthenticateController {
 		// Jak nie wiadomo jak ugryzc temat to zrob System.out.println("zapisuje usera do bazy") czy coś w tym stylu i pisz dalej, wrócimy do problemów
 		
 		return ResponseEntity.status(HttpStatus.CREATED).build();
+	}
+	
+	@RequestMapping(value = "/user", method = RequestMethod.GET)
+	public ResponseEntity<Object> getUser(@RequestBody Map<String, Object> json_result) 
+	{	         
+	    	System.out.println(json_result);
+			List<User> userList =  userRepository.findByUserid(json_result.get("user_id").toString());
+		
+			for(User userElem:userList) {
+				System.out.println(userElem.toString());
+			}
+	    	return ResponseEntity.status(HttpStatus.OK).build();
+	}
+	
+	@RequestMapping(value = "/user", method = RequestMethod.POST)
+	public ResponseEntity<Object> setUser(@RequestBody Map<String, Object> json_result) 
+	{	         
+	    	System.out.println(json_result);
+	    	// TODO before passing these params to constructor, we have to check if they are empty and we have all mandatory fields inside json
+			User newUser = new User(
+					json_result.get("user_id").toString(), 
+					json_result.get("passwd").toString()
+					);
+			System.out.println("I am after User constructor.");
+			try {
+			userRepository.save(newUser);
+			} catch {Exception e}
+			
+	    	return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
 }
 	
