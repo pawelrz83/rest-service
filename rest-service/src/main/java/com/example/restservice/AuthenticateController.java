@@ -31,7 +31,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class AuthenticateController {
 	@Autowired
-	public TokenRepository tokenRepository;   
+	public TokenRepository tokenRepository;
+	@Autowired
 	public UserRepository userRepository;
 	/*
 	 * private final AtomicLong counter = new AtomicLong();
@@ -295,8 +296,9 @@ public class AuthenticateController {
 	public ResponseEntity<Object> getUser(@RequestBody Map<String, Object> json_result) 
 	{	         
 	    	System.out.println(json_result);
+	    	System.out.println("before querying database");
 			List<User> userList =  userRepository.findByUserid(json_result.get("user_id").toString());
-		
+			System.out.println("After mongo select and before loop over the result");
 			for(User userElem:userList) {
 				System.out.println(userElem.toString());
 			}
@@ -313,12 +315,15 @@ public class AuthenticateController {
 					json_result.get("passwd").toString()
 					);
 			System.out.println("I am after User constructor.");
-			try {
+
 			userRepository.save(newUser);
-			} catch {Exception e}
+	
 			
 	    	return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
+	
+	//curl --request POST http://localhost:8080/user --header "Content-Type: application/json" -d "{\"user_id\":\"rzeczkop\", \"passwd\":\"1234\"}" -v
+
 }
 	
 

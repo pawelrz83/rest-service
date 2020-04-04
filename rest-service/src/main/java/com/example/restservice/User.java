@@ -24,14 +24,14 @@
 		private String salt;
 		private String shadow;
 		private String userid;
-		private final String defaultPasswd="1234";
 		
 		public User() {}
 		public User(String userid, String passwd) {
 			System.out.println("Start of constructor");
 			if(passwd.isEmpty())
 			{
-				passwd = this.defaultPasswd;
+				passwd = "1234";  //to load from configuration because when I wanted to use private final variable it always tried to save that into Database
+				// TODO find the way to eliminate fields saved to database.
 			}
 			
 			this.userid = userid; 
@@ -88,12 +88,12 @@
 		public String getUserid() {
 			return this.userid;
 		}
-		
+
 		@Override
 		public String toString() {
 			StringBuilder builder = new StringBuilder();
 			builder.append("UserProfile [id=").append(id).append(", userid=")
-					.append(userid).append("]");
+					.append(userid).append(", shadow=").append(shadow).append("]");
 			return builder.toString();
 		}
 			
